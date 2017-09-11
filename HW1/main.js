@@ -35,18 +35,49 @@ let quickSort = (arr, lo, hi) => {
 };
 
 let measurements = (repeats, amount, func) => {
+    const NS_PER_SEC = 1e9;
+    let diffArr = [];
+    let text = '';
     for (let i = 0; i < repeats; i++) {
         let arr = dataGenerator(amount);
         const time = process.hrtime();
         if (func.length === 3) {
+            text = 'Quick Sort   ';
             quickSort(arr, 0, arr.length - 1);
         } else {
+            text = 'Built In sort';
             arr.sort((a, b) => a - b);
         }
         const diff = process.hrtime(time);
-        console.log(`Iteration ${i} took ${diff[0]} seconds and ${diff[1]} nanoseconds`);
+        diffArr.push(diff[0] * NS_PER_SEC + diff[1]);
     }
+    let avg = diffArr.reduce((p, c) => p + c, 0) / diffArr.length;
+    console.log(`${text} average: ${avg / 1000000} ms`);
 };
 
-measurements(100, 10000, quickSort);
-measurements(100, 10000, Array.prototype.sort);
+//measurements(1, 10000000, quickSort);
+//measurements(1, 10000000, Array.prototype.sort);
+
+let randomSorting = (arr) => {
+
+    let isSorted = (arr) => {
+        for (let i = 0; i < arr.length - 1; i++) {
+            if (arr[i] > arr[i + 1]) {
+                console.log('nope');
+                return false;
+            }
+        }
+        console.log('yup');
+        return true;
+    };
+
+    while (!isSorted(arr)) {
+        for (let i = 0; i < arr.length - 1; i++) {
+            [arr[i], arr[Math.floor(Math.random() * (arr.length - 1))]] = [arr[Math.floor(Math.random() * (arr.length - 1))], arr[i]]
+        }
+    }
+
+};
+
+//let a = [1,9,2,8,3,7,4,6,0,5];
+//randomSorting(a);
