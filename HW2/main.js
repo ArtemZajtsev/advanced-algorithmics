@@ -85,14 +85,11 @@ let dualPivotQuicksort = (input, lowIndex, highIndex) => {
     exchange(input, lowIndex, --lt);
     exchange(input, highIndex, ++gt);
 
-
-
-    dualPivotQuicksort(input,lowIndex,lt-1);
-    dualPivotQuicksort(input,lt+1,gt-1);
-    dualPivotQuicksort(input,gt+1,highIndex);
+    dualPivotQuicksort(input, lowIndex, lt - 1);
+    dualPivotQuicksort(input, lt + 1, gt - 1);
+    dualPivotQuicksort(input, gt + 1, highIndex);
     console.log(input);
 };
 
-
-let a = [6,1,5,2,4,3,0];
-dualPivotQuicksort(a,0,a.length-1);
+//let a = [6, 1, 5, 2, 4, 3, 0];
+//dualPivotQuicksort(a, 0, a.length - 1);
