@@ -88,8 +88,40 @@ let dualPivotQuicksort = (input, lowIndex, highIndex) => {
     dualPivotQuicksort(input, lowIndex, lt - 1);
     dualPivotQuicksort(input, lt + 1, gt - 1);
     dualPivotQuicksort(input, gt + 1, highIndex);
-    console.log(input);
 };
+
 
 //let a = [6, 1, 5, 2, 4, 3, 0];
 //dualPivotQuicksort(a, 0, a.length - 1);
+
+let dataGenerator = (n) => {
+    let arr = [];
+    for (let i = 0; i < n; i++) {
+        arr.push(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER));
+    }
+    return arr;
+};
+
+let measurements = (repeats, amount, func) => {
+    const NS_PER_SEC = 1e9;
+    let diffArr = [];
+    let text = '';
+    for (let i = 0; i < repeats; i++) {
+        let arr = dataGenerator(amount);
+        const time = process.hrtime();
+        if (func.length === 3) {
+            text = 'Dual pivot Quicksort   ';
+            dualPivotQuicksort(arr, 0, arr.length - 1);
+        } else {
+            text = 'Built In sort';
+            arr.sort((a, b) => a - b);
+        }
+        const diff = process.hrtime(time);
+        diffArr.push(diff[0] * NS_PER_SEC + diff[1]);
+    }
+    let avg = diffArr.reduce((p, c) => p + c, 0) / diffArr.length;
+    console.log(`${text} average: ${avg / 1000000} ms`);
+};
+
+//measurements(100,1000000,dualPivotQuicksort);
+//measurements(100,10,Array.prototype.sort);
