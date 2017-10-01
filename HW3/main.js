@@ -51,5 +51,6 @@ let measurements = (repeats, length, maxValue, func) => {
     console.log(`${text} average: ${avg / 1000000} ms for length ${length} and  ${maxValue} max value`);
 };
 
-measurements(100, 1000000, MAX_8_BIT, countingSort);
+measurements(100, 10, MAX_8_BIT, countingSort);
+measurements(100, 10, MAX_8_BIT, Array.prototype.sort());
 //measurements(100, 10, MAX_32_BIT, Array.prototype.sort());
