@@ -12,21 +12,24 @@ const distance = (a, b) => {
     return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2);
 };
 
-let tree = new kdTree.kdTree(points, distance, ["x", "y"]);
+let medianTree = new kdTree.kdTree(points, distance, ["x", "y"], false);
+let randomTree = new kdTree.kdTree(points, distance, ["x", "y"], true);
 
-let accumulator = {};
+let medianAccumulator = {};
+let randomAccumulator = {};
 
-const depthCalculator = (node) => {
-    accumulator[node.depth] = accumulator[node.depth] ? accumulator[node.depth]+1 : 1;
-    //console.log(accumulator);
+const depthCalculator = (node, accumulator) => {
+    accumulator[node.depth] = accumulator[node.depth] ? accumulator[node.depth] + 1 : 1;
     if (node.left) {
-        depthCalculator(node.left);
+        depthCalculator(node.left, accumulator);
     }
     if (node.right) {
-        depthCalculator(node.right);
+        depthCalculator(node.right, accumulator);
     }
 };
 
-depthCalculator(tree.root);
+depthCalculator(medianTree.root, medianAccumulator);
+depthCalculator(randomTree.root, randomAccumulator);
 
-console.log(accumulator);
+console.log(medianAccumulator);
+console.log(randomAccumulator);

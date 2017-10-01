@@ -9,7 +9,7 @@
  * @license MIT License <http://www.opensource.org/licenses/mit-license.php>
  */
 
-(function (root, factory) {
+(function(root, factory) {
     if (typeof define === 'function' && define.amd) {
         define(['exports'], factory);
     } else if (typeof exports === 'object') {
@@ -17,8 +17,8 @@
     } else {
         factory((root.commonJsStrict = {}));
     }
-}(this, function (exports) {
-    function Node(obj, dimension, parent,depth) {
+}(this, function(exports) {
+    function Node(obj, dimension, parent, depth) {
         this.obj = obj;
         this.left = null;
         this.right = null;
@@ -28,7 +28,7 @@
         this.depth = depth;
     }
 
-    function kdTree(points, metric, dimensions) {
+    function kdTree(points, metric, dimensions, randomSelection) {
 
         var self = this;
 
@@ -41,27 +41,29 @@
                 return null;
             }
             if (points.length === 1) {
-                return new Node(points[0], dim, parent, parent.depth+1);
+                return new Node(points[0], dim, parent, parent.depth + 1);
             }
 
-            points.sort(function (a, b) {
+            points.sort(function(a, b) {
                 return a[dimensions[dim]] - b[dimensions[dim]];
             });
-
-            median = Math.floor(points.length / 2);
-            node = new Node(points[median], dim, parent,depth);
+            if (randomSelection) {
+                median = Math.floor(Math.random() * points.length)
+            } else {
+                median = Math.floor(points.length / 2);
+            }
+            node = new Node(points[median], dim, parent, depth);
             node.left = buildTree(points.slice(0, median), depth + 1, node);
             node.right = buildTree(points.slice(median + 1), depth + 1, node);
-
             return node;
         }
 
         // Reloads a serialied tree
-        function loadTree (data) {
+        function loadTree(data) {
             // Just need to restore the `parent` parameter
             self.root = data;
 
-            function restoreParent (root) {
+            function restoreParent(root) {
                 if (root.left) {
                     root.left.parent = root;
                     restoreParent(root.left);
@@ -82,7 +84,7 @@
 
         // Convert to a JSON serializable structure; this just requires removing
         // the `parent` property
-        this.toJSON = function (src) {
+        this.toJSON = function(src) {
             if (!src) src = this.root;
             var dest = new Node(src.obj, src.dimension, null);
             if (src.left) dest.left = self.toJSON(src.left);
@@ -90,7 +92,7 @@
             return dest;
         };
 
-        this.insert = function (point) {
+        this.insert = function(point) {
             function innerSearch(node, parent) {
 
                 if (node === null) {
@@ -124,7 +126,7 @@
             }
         };
 
-        this.remove = function (point) {
+        this.remove = function(point) {
             var node;
 
             function nodeSearch(node) {
@@ -221,18 +223,22 @@
 
             node = nodeSearch(self.root);
 
-            if (node === null) { return; }
+            if (node === null) {
+                return;
+            }
 
             removeNode(node);
         };
 
-        this.nearest = function (point, maxNodes, maxDistance) {
+        this.nearest = function(point, maxNodes, maxDistance) {
             var i,
                 result,
                 bestNodes;
 
             bestNodes = new BinaryHeap(
-                function (e) { return -e[1]; }
+                function(e) {
+                    return -e[1];
+                }
             );
 
             function nearestSearch(node) {
@@ -304,7 +310,7 @@
                 }
             }
 
-            if(self.root)
+            if (self.root)
                 nearestSearch(self.root);
 
             result = [];
@@ -317,7 +323,7 @@
             return result;
         };
 
-        this.balanceFactor = function () {
+        this.balanceFactor = function() {
             function height(node) {
                 if (node === null) {
                     return 0;
@@ -339,7 +345,7 @@
     // Binary heap implementation from:
     // http://eloquentjavascript.net/appendix2.html
 
-    function BinaryHeap(scoreFunction){
+    function BinaryHeap(scoreFunction) {
         this.content = [];
         this.scoreFunction = scoreFunction;
     }
@@ -424,7 +430,7 @@
                 element = this.content[n],
                 elemScore = this.scoreFunction(element);
 
-            while(true) {
+            while (true) {
                 // Compute the indices of the child elements.
                 var child2N = (n + 1) * 2, child1N = child2N - 1;
                 // This is used to store the new position of the element,
@@ -443,7 +449,7 @@
                 if (child2N < length) {
                     var child2 = this.content[child2N],
                         child2Score = this.scoreFunction(child2);
-                    if (child2Score < (swap == null ? elemScore : child1Score)){
+                    if (child2Score < (swap == null ? elemScore : child1Score)) {
                         swap = child2N;
                     }
                 }
