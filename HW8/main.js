@@ -1,5 +1,6 @@
 const fs = require('fs');
 const dijkstra = require('./dijkstra.js');
+const prims = require('./prims.js');
 
 // let rawEdges = fs.readFileSync('./input/testEdge.txt', 'utf-8');
 // let rawVertexes = fs.readFileSync('./input/testVertexes.txt', 'utf-8');
@@ -74,27 +75,28 @@ const initBfs = (graph, searchVertexName) => {
     };
 
     bfs(initialVertex);
-    //console.log(discoveries);
+    return discoveries;
 };
 
 
-initBfs(createVertexes(rawEdges, rawVertexes), 'J');
+let bfsDiscoveries = initBfs(createVertexes(rawEdges, rawVertexes), 'J');
+//console.log(bfsDiscoveries);
 
-let g = new dijkstra.Graph();
+let dijkstraGraph = new dijkstra.Graph();
 
 const dijkstraParser = (vertexes) => {
 
     const distanceCalculator = (initialVertex, namesArr) => {
         let result = {};
         namesArr.forEach((name) => {
-           let currentVertex = vertexes.find(x => x.name === name);
+            let currentVertex = vertexes.find(x => x.name === name);
             result[name] = Math.sqrt(Math.pow(initialVertex.x - currentVertex.x, 2) + Math.pow(initialVertex.y - currentVertex.y, 2));
         });
         return result;
     };
 
     vertexes.forEach((vertex) => {
-        g.addVertex(vertex.name, distanceCalculator(vertex, vertex.connected));
+        dijkstraGraph.addVertex(vertex.name, distanceCalculator(vertex, vertex.connected));
     });
 };
 
@@ -104,10 +106,29 @@ const allShortestDistsFrom = (from) => {
 
     dijkstraParser(vertexes);
     vertexes.forEach((vertex) => {
-        result[`A -> ${vertex.name}`] = g.shortestPath(from, vertex.name).concat([from]).reverse();
+        result[`A -> ${vertex.name}`] = dijkstraGraph.shortestPath(from, vertex.name).concat([from]).reverse();
     });
 
-    console.log(result);
+    return result;
 };
 
-allShortestDistsFrom('A');
+let dijkstraResult = allShortestDistsFrom('A');
+//console.log(dijkstraResult);
+
+let primsGraph = new prims.Graph();
+
+const primsParser = (vertexes, edges) => {
+    //console.log(edges);
+    vertexes.forEach((vertex) => {
+        primsGraph.addNode(vertex.name);
+    });
+    edges.split(/\n/).forEach((row) => {
+        let split = row.split(' ');
+        primsGraph.addEdge(split[0], split[1], split[3]);
+    })
+};
+
+primsParser(createVertexes(rawEdges, rawVertexes), rawEdges);
+
+let primRes =prims.Prim(primsGraph, 'A');
+//console.log(primRes);
