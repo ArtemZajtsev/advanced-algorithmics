@@ -74,6 +74,7 @@ const initDfs = (graph) => {
 let dfsDiscoveries = initDfs(createVertexes(rawEdges, rawVertexes));
 //console.log(dfsDiscoveries);
 
+
 let dijkstraGraph = new dijkstra.Graph();
 
 const dijkstraParser = (vertexes) => {
@@ -155,12 +156,29 @@ const sccParser = (vertexes) => {
     vertexes.forEach((vertex) => {
         let edges = [];
         vertex.connected.forEach((connection) => {
-           edges.push(dictionary.indexOf(connection));
+            edges.push(dictionary.indexOf(connection));
         });
         adjList.push(edges);
     });
     return adjList;
 };
 
-console.log(sccParser(createDirectedVertexes(directedRawEdges, directedRawVertexes)));
+//console.log(sccParser(createDirectedVertexes(directedRawEdges, directedRawVertexes)));
 
+let sccLib = scc.stronglyConnectedComponents;
+
+let sccResult = (sccLib(sccParser(createDirectedVertexes(directedRawEdges, directedRawVertexes))));
+let stronglyConnectedComponentsLetters = (scc) => {
+    let dictionary = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'];
+    let result = [];
+    scc.components.forEach((arr) => {
+        let edges = [];
+        arr.forEach((element) => {
+            edges.push(dictionary[element]);
+        });
+        result.push(edges);
+    });
+    return result;
+};
+
+console.log(stronglyConnectedComponentsLetters(sccResult));
