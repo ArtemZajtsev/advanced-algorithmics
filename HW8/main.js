@@ -57,22 +57,24 @@ const initDfs = (graph) => {
         vertex.discover = time;
         vertex.visited = true;
         discoveries.push(vertex.name);
+        vertex.connected.sort();
         for (let i = 0; i < vertex.connected.length; i++) {
             let connectedVertex = graph.find(x => x.name === vertex.connected[i]);
             if (!connectedVertex.visited) {
                 dfs(connectedVertex);
             }
         }
-        vertex.finish = time;
+        vertex.finish = ++time;
     };
 
     dfs(initialVertex);
-    return discoveries;
+    return graph;
+    //return discoveries;
 };
 
 
 let dfsDiscoveries = initDfs(createVertexes(rawEdges, rawVertexes));
-//console.log(dfsDiscoveries);
+console.log(dfsDiscoveries);
 
 
 let dijkstraGraph = new dijkstra.Graph();
@@ -181,4 +183,5 @@ let stronglyConnectedComponentsLetters = (scc) => {
     return result;
 };
 
-console.log(stronglyConnectedComponentsLetters(sccResult));
+let letterStronglyConnectedResult = stronglyConnectedComponentsLetters(sccResult);
+//console.log(letterStronglyConnectedResult);
