@@ -1,6 +1,7 @@
 const fs = require('fs');
 const dijkstra = require('./dijkstra.js');
 const prims = require('./prims.js');
+const scc = require('./scc.js');
 
 // let rawEdges = fs.readFileSync('./input/testEdge.txt', 'utf-8');
 // let rawVertexes = fs.readFileSync('./input/testVertexes.txt', 'utf-8');
@@ -10,7 +11,7 @@ let rawVertexes = fs.readFileSync('./input/vertexes.txt', 'utf-8');
 class Vertex {
     constructor(name, x, y) {
         this.name = name;
-        this.discover = 0;
+        this.discover = -1;
         this.finish = 0;
         this.connected = [];
         this.visited = false;
@@ -46,41 +47,32 @@ const createVertexes = (rawEdges, rawVertexes) => {
     return vertexArray;
 };
 
-// console.log(createVertexes(rawEdges,rawVertexes));
-
-const initBfs = (graph, searchVertexName) => {
+const initDfs = (graph) => {
     let initialVertex = graph.find(x => x.name === 'A');
     let discoveries = [];
     let time = 0;
 
-    const bfs = (vertex) => {
-        if (vertex.name === searchVertexName) {
-            discoveries.push(`Found!! ${vertex.name}`);
-            vertex.finish = time;
-            //console.log(vertex);
-            return null;
-        } else {
-            time++;
-            discoveries.push(vertex.name);
-            vertex.visited = true;
-            for (let i = 0; i < vertex.connected.length; i++) {
-                let connectedVertex = graph.find(x => x.name === vertex.connected[i]);
-                if (connectedVertex.name === searchVertexName) break;
-                if (!connectedVertex.visited) {
-                    connectedVertex.discover = time;
-                    bfs(connectedVertex);
-                }
+    const dfs = (vertex) => {
+        time++;
+        vertex.discover = time;
+        vertex.visited = true;
+        discoveries.push(vertex.name);
+        for (let i = 0; i < vertex.connected.length; i++) {
+            let connectedVertex = graph.find(x => x.name === vertex.connected[i]);
+            if (!connectedVertex.visited) {
+                dfs(connectedVertex);
             }
         }
+        vertex.finish = time;
     };
 
-    bfs(initialVertex);
+    dfs(initialVertex);
     return discoveries;
 };
 
 
-let bfsDiscoveries = initBfs(createVertexes(rawEdges, rawVertexes), 'J');
-//console.log(bfsDiscoveries);
+let dfsDiscoveries = initDfs(createVertexes(rawEdges, rawVertexes));
+//console.log(dfsDiscoveries);
 
 let dijkstraGraph = new dijkstra.Graph();
 
@@ -130,5 +122,45 @@ const primsParser = (vertexes, edges) => {
 
 primsParser(createVertexes(rawEdges, rawVertexes), rawEdges);
 
-let primRes =prims.Prim(primsGraph, 'A');
+let primRes = prims.Prim(primsGraph, 'A');
 //console.log(primRes);
+
+
+let directedRawEdges = fs.readFileSync('./input/edgesDirected.txt', 'utf-8');
+let directedRawVertexes = fs.readFileSync('./input/vertexesDirected.txt', 'utf-8');
+
+const createDirectedVertexes = (rawEdges, rawVertexes) => {
+    let vertexArray = [];
+    rawVertexes.split(/\n/).forEach((row) => {
+        let split = row.split(" ");
+        vertexArray.push(new Vertex(split[0], parseInt(split[1]), parseInt(split[2])));
+    });
+    rawEdges.split(/\n/).forEach((row) => {
+        let split = row.split(' ');
+        vertexArray.forEach((vertex) => {
+            if (vertex.name === split[0]) {
+                vertex.connected.push(split[1]);
+            }
+            vertex.connected = uniqueArray(vertex.connected);
+        });
+    });
+    return vertexArray;
+};
+
+//console.log(createDirectedVertexes(directedRawEdges, directedRawVertexes));
+
+const sccParser = (vertexes) => {
+    let dictionary = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'];
+    let adjList = [];
+    vertexes.forEach((vertex) => {
+        let edges = [];
+        vertex.connected.forEach((connection) => {
+           edges.push(dictionary.indexOf(connection));
+        });
+        adjList.push(edges);
+    });
+    return adjList;
+};
+
+console.log(sccParser(createDirectedVertexes(directedRawEdges, directedRawVertexes)));
+
