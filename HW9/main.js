@@ -61,7 +61,8 @@ const matrixMultiplication = (m1, m2) => {
         for (let j = 0; j < m2[0].length; j++) {
             let sum = 0;
             for (let k = 0; k < m1[0].length; k++) {
-                sum += m1[i][k] * m2[k][j];
+                //sum += m1[i][k] * m2[k][j];
+                sum = (sum + m1[i][k] * m2[k][j]) > 0 ? 1 : 0;
             }
             result[i][j] = sum;
         }
@@ -75,17 +76,67 @@ let numberMatrix = matrixMultiplication(matrixMultiplication(matrix, matrix), ma
 const numberToLetterMatrix = (numberMatrix) => {
     let dictionary = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'];
     let result = [];
-    for(let i=0; i<numberMatrix.length; i++) {
+    for (let i = 0; i < numberMatrix.length; i++) {
         let letterRow = new Array(dictionary.length).fill('-');
-        for(let j=0; j< numberMatrix[i].length; j++) {
-            if(numberMatrix[i][j] === 1) {
+        for (let j = 0; j < numberMatrix[i].length; j++) {
+            if (numberMatrix[i][j]) {
                 letterRow[j] = dictionary[j];
             }
         }
-        letterRow.unshift(`For letter ${dictionary[i]}`);
+        letterRow.unshift(`For vertex ${dictionary[i]}`);
         result.push(letterRow);
     }
     return result;
 };
 
-console.log(numberToLetterMatrix(numberMatrix));
+//console.log(numberToLetterMatrix(numberMatrix));
+
+const warshall = (matrix) => {
+    let result = matrix;
+    for(let i=0; i< result.length; i++) {
+        for(let s=0; s<result.length;s++) {
+            for(let t = 0; t<result.length; t++) {
+                if(result[s][i] && result[i][t]) {
+                    result[s][t] = 1;
+                }
+            }
+        }
+    }
+    return result;
+};
+
+//console.log(warshall(matrix));
+
+
+const doStuffUntilMatrixWillNotChange = (initialMatrix, approach) => {
+    let notSameMatrix = true;
+    let prevMatrix = initialMatrix;
+    let iterations = 0;
+    while (notSameMatrix) {
+        let currentMatrix = [];
+        if(approach === 'manyG') {
+            currentMatrix = matrixMultiplication(prevMatrix,initialMatrix);
+        } else if(approach === 'g2') {
+            currentMatrix = matrixMultiplication(prevMatrix,prevMatrix);
+        }
+        else if(approach === 'warshall') {
+            return warshall(matrix);
+        }
+
+        if(JSON.stringify(prevMatrix) === JSON.stringify(currentMatrix)) {
+            notSameMatrix = false;
+        }
+        prevMatrix = currentMatrix;
+        iterations++;
+    }
+    return prevMatrix;
+};
+
+let manyGApproach = doStuffUntilMatrixWillNotChange(matrix, 'manyG');
+//console.log(numberToLetterMatrix(manyGApproach));
+let g2 = doStuffUntilMatrixWillNotChange(matrix, 'g2');
+//console.log(numberToLetterMatrix(g2));
+let warshallResult = doStuffUntilMatrixWillNotChange(matrix, 'warshall');
+//console.log(numberToLetterMatrix(warshallResult));
+
+
