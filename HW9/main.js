@@ -2,11 +2,13 @@ const fs = require('fs');
 
 let rawEdges = fs.readFileSync('./edges.txt', 'utf-8');
 let rawVertexes = fs.readFileSync('./vertexes.txt', 'utf-8');
+let rawEdgesSelfLinks = fs.readFileSync('./edgesWithSelfLinks.txt', 'utf-8');
 
 class Vertex {
     constructor(name) {
         this.name = name;
         this.connected = [];
+        this.count = 0;
     }
 }
 
@@ -93,10 +95,10 @@ const numberToLetterMatrix = (numberMatrix) => {
 
 const warshall = (matrix) => {
     let result = matrix;
-    for(let i=0; i< result.length; i++) {
-        for(let s=0; s<result.length;s++) {
-            for(let t = 0; t<result.length; t++) {
-                if(result[s][i] && result[i][t]) {
+    for (let i = 0; i < result.length; i++) {
+        for (let s = 0; s < result.length; s++) {
+            for (let t = 0; t < result.length; t++) {
+                if (result[s][i] && result[i][t]) {
                     result[s][t] = 1;
                 }
             }
@@ -114,16 +116,16 @@ const doStuffUntilMatrixWillNotChange = (initialMatrix, approach) => {
     let iterations = 0;
     while (notSameMatrix) {
         let currentMatrix = [];
-        if(approach === 'manyG') {
-            currentMatrix = matrixMultiplication(prevMatrix,initialMatrix);
-        } else if(approach === 'g2') {
-            currentMatrix = matrixMultiplication(prevMatrix,prevMatrix);
+        if (approach === 'manyG') {
+            currentMatrix = matrixMultiplication(prevMatrix, initialMatrix);
+        } else if (approach === 'g2') {
+            currentMatrix = matrixMultiplication(prevMatrix, prevMatrix);
         }
-        else if(approach === 'warshall') {
+        else if (approach === 'warshall') {
             return warshall(matrix);
         }
 
-        if(JSON.stringify(prevMatrix) === JSON.stringify(currentMatrix)) {
+        if (JSON.stringify(prevMatrix) === JSON.stringify(currentMatrix)) {
             notSameMatrix = false;
         }
         prevMatrix = currentMatrix;
@@ -132,11 +134,47 @@ const doStuffUntilMatrixWillNotChange = (initialMatrix, approach) => {
     return prevMatrix;
 };
 
-let manyGApproach = doStuffUntilMatrixWillNotChange(matrix, 'manyG');
+let matrixSelfEdges = matrixParser(createVertexes(rawEdgesSelfLinks, rawVertexes));
+
+let manyGApproach = doStuffUntilMatrixWillNotChange(matrixSelfEdges, 'manyG');
 //console.log(numberToLetterMatrix(manyGApproach));
-let g2 = doStuffUntilMatrixWillNotChange(matrix, 'g2');
+let g2 = doStuffUntilMatrixWillNotChange(matrixSelfEdges, 'g2');
 //console.log(numberToLetterMatrix(g2));
-let warshallResult = doStuffUntilMatrixWillNotChange(matrix, 'warshall');
+let warshallResult = doStuffUntilMatrixWillNotChange(matrixSelfEdges, 'warshall');
 //console.log(numberToLetterMatrix(warshallResult));
 
+const randomWalk = (vertexes, steps, randomJumps) => {
+    let result = [];
+    let currentVertex = {};
+    let nextVertex = {};
+    for (let i = 0; i < steps; i++) {
+        if (randomJumps) {
+            let jumpProbability = Math.random();
+            if(jumpProbability > 0.8) {
+                currentVertex = vertexes[Math.floor(Math.random() * vertexes.length)];
+                currentVertex.count++;
+            } else {
+                nextVertex = currentVertex.connected ? vertexes.find(x => x.name === currentVertex.connected[Math.floor(Math.random() * currentVertex.connected.length)]) : currentVertex;
+                currentVertex.count++;
+                currentVertex = nextVertex ? nextVertex : currentVertex;
+            }
+        } else {
+            if (currentVertex && currentVertex.connected) {
+                nextVertex = vertexes.find(x => x.name === currentVertex.connected[Math.floor(Math.random() * currentVertex.connected.length)]);
+                currentVertex.count++;
+                currentVertex = nextVertex;
+            } else {
+                currentVertex = vertexes[Math.floor(Math.random() * vertexes.length)];
+                currentVertex.count++;
+            }
+        }
+    }
 
+    vertexes.forEach((vertex) => {
+        result.push({name: vertex.name, probability: `${vertex.count / steps * 100} %`})
+    });
+    return result;
+};
+
+//console.log(randomWalk(vertexes, 1000000, false));
+console.log(randomWalk(vertexes, 1000000, true));

@@ -13,3 +13,14 @@ H F 1
 I G 1
 J I 1
 K E 1
+A A 1
+B B 1
+C C 1
+D D 1
+E E 1
+F F 1
+G G 1
+H H 1
+I I 1
+J J 1
+K K 1
