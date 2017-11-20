@@ -133,20 +133,26 @@ class Node {
         this.blocked = false;
     }
 
-    setRegion() {
+    setRegion(startNode) {
         if (this.x >= 150 && this.x <= 350 && this.y >= 600 && this.y <= 800) {
             this.hCost = Infinity;
             this.blocked = true;
-        } else if (euclideanDistance(this.x, this.y, 550, 720) <= 150) {
+        }
+        if (euclideanDistance(this.x, this.y, 550, 720) <= 150) {
             this.hCost = Infinity;
             this.blocked = true;
-        } else if (euclideanDistance(this.x, this.y, 600, 350) <= 200) {
+        }
+        if (euclideanDistance(this.x, this.y, 600, 350) <= 200) {
             this.stepDistanceMultiplier = 2;
-        } else if (euclideanDistance(this.x, this.y, 250, 450) <= 70) {
+        }
+        if (euclideanDistance(this.x, this.y, 250, 450) <= 70) {
             this.stepDistanceMultiplier = 4;
-        } else if (euclideanDistance(this.x, this.y, 150, 350) <= 80) {
+        }
+        if (euclideanDistance(this.x, this.y, 150, 350) <= 80) {
             this.stepDistanceMultiplier = 4;
-        } else if (Math.abs(this.y - 0.25 * this.x + 87.5) > 5 && this.x >= 150 && this.x <= 950 && this.y >= 50 && this.y <= 150) {
+        }
+        if ((startNode.y - 0.25 * startNode.x + 87.5 >= 0 && this.y - 0.25 * this.x + 87.5 <= 0 || startNode.y - 0.25 * startNode.x + 87.5 <= 0 && this.y - 0.25 * this.x + 87.5 >= 0 )
+            && this.x >= 550 && this.x <= 950 && this.y >= 50 && this.y <= 150) {
             this.hCost = Infinity;
             this.blocked = true;
         }
@@ -169,7 +175,7 @@ const getDestinations = (node) => {
     }
 
     destinations.forEach((destination) => {
-        destination.setRegion();
+        destination.setRegion(node);
         destination.gCost = node.gCost + euclideanDistance(node.x, node.y, destination.x, destination.y) * destination.stepDistanceMultiplier;
     });
 
@@ -188,82 +194,66 @@ const aStar = (startNode) => {
     };
 
     let open = [];
-    let closed = [];
+    let closedHash = {};
     let found = false;
     startNode.open = true;
     startNode.closed = false;
     open.push(startNode);
-    while (!found) {
-        let fCostArr = [];
+    let count = 0;
 
+    while (!found) {
         open.sort((x, y) => x.fCost - y.fCost);
 
-        if (open.length > 100) {
-            open.length = 100;
+        if (open.length > 1000) {
+            open.length = 1000;
         }
 
-        open.forEach((node) => {
-            fCostArr.push(node.fCost);
-        });
-
-        let indexOfCurrent = open.findIndex((x) => x.fCost === Math.min(...fCostArr));
-        let current = open[indexOfCurrent];
-        if (indexOfCurrent !== -1) {
-            open.splice(indexOfCurrent, 1);
-        }
-
+        const current = open.shift();
         current.closed = true;
         current.open = false;
+        closedHash[`${current.x}:${current.y}`] = current;
 
         stream.write(`fcircle ${current.x},${current.y} 1 black\n`);
 
-        closed.push(current);
-
-        if (closed.length % 1000 === 0) {
-            console.log(closed.length);
+        count++;
+        if (count  % 1000 === 0) {
+            console.log(count);
         }
 
+        //return condition
         if (euclideanDistance(current.x, current.y, endNode.x, endNode.y) <= 10) {
+            console.log(current.fCost);
             found = true;
-            getPath(closed[closed.length - 1]);
+            getPath(current);
             stream.end();
             return;
         }
 
-        let neighbours = getDestinations(current);
-
-        for (let i = 0; i < neighbours.length; i++) {
-            let index = closed.findIndex((closedNode) => {
-                return closedNode.x === neighbours[i].x && closedNode.y === neighbours[i].y;
-            });
-            if (index !== -1) {
-                neighbours[i] = closed[index];
-            }
-        }
-
-        neighbours.forEach((neighbour) => {
-            if (neighbour.closed || neighbour.blocked) {
+        getDestinations(current).forEach((neighbour) => {
+            if (closedHash[`${neighbour.x}:${neighbour.y}`] || neighbour.blocked) {
                 return;
             }
 
-            let oldVersionInOpen = open.find((x) => {
-                return x.x === neighbour.x && x.y === neighbour.y;
-            });
+            let oldVersionInOpen = open.find((x) => x.x === neighbour.x && x.y === neighbour.y);
 
-            if (!neighbour.open || neighbour.gCost < oldVersionInOpen.gCost) {
+            if (oldVersionInOpen) {
+                neighbour.open = true;
+            }
+
+            if (!neighbour.open || (neighbour.gCost < oldVersionInOpen.gCost)) {
                 neighbour.fCost = neighbour.gCost + neighbour.hCost;
                 neighbour.parent = current;
 
-                let indexOfNeighbour = open.findIndex((x) => {
-                    return x.x === neighbour.x && x.y === neighbour.y;
-                });
-                if (indexOfNeighbour === -1) {
+                if (!neighbour.open) {
+                    neighbour.open = true;
                     open.push(neighbour);
+                } else {
+                    oldVersionInOpen.fCost = neighbour.gCost + oldVersionInOpen.hCost;
+                    oldVersionInOpen.parent = current;
                 }
             }
         });
     }
-
 };
 
 aStar(startNode);
