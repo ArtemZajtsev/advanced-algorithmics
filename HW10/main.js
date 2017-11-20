@@ -112,8 +112,8 @@ const randomWalkMatrices = (matrix, n) => {
 //console.log(numberToLetterMatrix(randomWalkMatrices(originalMatrix, 100)));
 //randomWalkMatrices(originalMatrix, 100);
 
-const startNodeCoords = [80, 920];
-const endNodeCoords = [800, 80];
+const startNodeCoords = [10, 990];
+const endNodeCoords = [990, 10];
 
 const euclideanDistance = (x1, y1, x2, y2) => {
     return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
@@ -158,6 +158,67 @@ class Node {
         }
     }
 
+    setMiddleEarth(startNode) {
+        if (this.x >= 50 && this.x <= 700 && this.y >= 175 && this.y <= 250) {
+            //ered nimaris
+            this.hCost = Infinity;
+            this.blocked = true;
+        }
+        if (this.x >= 850 && this.x <= 900 && this.y >= 0 && this.y <= 100) {
+            //efel duath
+            this.hCost = Infinity;
+            this.blocked = true;
+        }
+        if (this.x >= 850 && this.x <= 900 && this.y >= 110 && this.y <= 175) {
+            //efel duath
+            this.hCost = Infinity;
+            this.blocked = true;
+        }
+        if (this.x >= 870 && this.x <= 1000 && this.y >= 200 && this.y <= 250) {
+            //ered lithui
+            this.hCost = Infinity;
+            this.blocked = true;
+        }
+        if (this.x >= 750 && this.x <= 800 && this.y >= 0 && this.y <= 300) {
+            //anduin
+            this.stepDistanceMultiplier = 4;
+        }
+        if (this.x >= 650 && this.x <= 800 && this.y >= 300 && this.y <= 350) {
+            //anduin
+            this.stepDistanceMultiplier = 4;
+        }
+        if (this.x >= 650 && this.x <= 700 && this.y >= 350 && this.y <= 1000) {
+            //anduin
+            this.stepDistanceMultiplier = 4;
+        }
+        if (this.x >= 450 && this.x <= 600 && this.y >= 300 && this.y <= 500) {
+            //moria
+            this.hCost = Infinity;
+            this.blocked = true;
+        }
+        if (this.x >= 450 && this.x <= 600 && this.y >= 525 && this.y <= 1000) {
+            //moria
+            this.hCost = Infinity;
+            this.blocked = true;
+        }
+        if (euclideanDistance(this.x, this.y, 600, 275) <= 20) {
+            //fangorn
+            this.stepDistanceMultiplier = 2
+        }
+        if (euclideanDistance(this.x, this.y, 425, 515) <= 25) {
+            //trollshaws
+            this.stepDistanceMultiplier = 2
+        }
+        if (euclideanDistance(this.x, this.y, 825, 525) <= 100) {
+            //mirkwood
+            this.stepDistanceMultiplier = 2
+        }
+        if (euclideanDistance(this.x, this.y, 250, 700) <= 100) {
+            //old forest
+            this.stepDistanceMultiplier = 2
+        }
+    }
+
 }
 
 let startNode = new Node(startNodeCoords[0], startNodeCoords[1]);
@@ -175,7 +236,7 @@ const getDestinations = (node) => {
     }
 
     destinations.forEach((destination) => {
-        destination.setRegion(node);
+        destination.setMiddleEarth(node);
         destination.gCost = node.gCost + euclideanDistance(node.x, node.y, destination.x, destination.y) * destination.stepDistanceMultiplier;
     });
 
@@ -216,7 +277,7 @@ const aStar = (startNode) => {
         stream.write(`fcircle ${current.x},${current.y} 1 black\n`);
 
         count++;
-        if (count  % 1000 === 0) {
+        if (count % 1000 === 0) {
             console.log(count);
         }
 

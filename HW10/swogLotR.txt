@@ -1,0 +1,40 @@
+new 1200,1200
+
+string 20,20 {2017: Artem Zaitsev, A*, middle earth. Distance: xxxx.yyyyy } :tekst
+coordsys west south right up
+origin 100,100
+rect 0,0 1000,1000 gray
+fcircle 10,990 8 blue
+string 1,1000 {shire }
+fcircle 990,10 8 red
+string 1000,1 {Orodruin }
+
+frect 50,175 700,250 pink
+string 300,200 {Ered Nimaris}
+frect 850,0 900,100 pink
+frect 850,110 900,175 pink
+string 850,145 {Efel Duath}
+frect 870,200 1000,250 pink
+string 880,225 {Ered Lithui}
+
+frect 750,0 800,300 blue
+frect 650,300 800,350 blue
+string 700,325 {Anduin}
+frect 650,350 700,1000 blue
+
+frect 450,300 600,500 pink
+frect 450,525 600,1000 pink
+string 500,700 {Moria}
+string 500,400 {Moria}
+
+fcircle 600,275 20 green
+string 600,275 {Fangorn}
+
+fcircle 425,515 25 green
+string 400,515 {Trollshaws}
+
+fcircle 825,525 100 green
+string 825,525 {Mirkwood}
+
+fcircle 250,700 100 green
+string 250,700 {Old Forest}
