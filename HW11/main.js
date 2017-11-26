@@ -66,7 +66,7 @@ const buildRoute = (cities, currentCity, acc) => {
         path.push(currentCity);
         stream.write(`line ${currentCity.x},${currentCity.y} ${firstCity.x},${firstCity.y} black\n`);
         path.push(firstCity);
-        console.log(acc);
+        //console.log(acc);
         return acc;
     }
 };
@@ -121,9 +121,10 @@ const twoOpt = (path) => {
     };
 
     let bestDistance;
+    let counter = 0;
     while (improve < 10) {
         bestDistance = calculatePathLength(localPath);
-
+        counter++;
         for (let i = 0; i < size - 1; i++) {
             for (let k = i + 1; k < size; k++) {
                 TwoOptSwap(i, k);
@@ -133,13 +134,14 @@ const twoOpt = (path) => {
                     // localPath = newPath;
                     localPath = [...newPath];
                     bestDistance = newDistance;
-                    console.log(newDistance);
+                    //console.log(newDistance);
                 }
             }
         }
         improve++;
     }
     console.log(bestDistance);
+    console.log(`Counter: ${counter}`);
     return newPath;
 };
 
@@ -170,7 +172,10 @@ const buildRandomPath = (raw) => {
     return shuffle(vertexArray);
 };
 
+const hrstart = process.hrtime();
 let optimizedRandomPath = twoOpt(buildRandomPath(thousand));
+const hrend = process.hrtime(hrstart);
+console.log(`Time: ${hrend[0]}s`);
 
 let optimizedPath = twoOpt(path);
 logOptimizedPath(optimizedPath, 'optimized1000.txt');
